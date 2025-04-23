@@ -1,0 +1,12 @@
+services:
+  kas-mend-builder:
+    build:
+      context: ./
+      args:
+         USERNAME: jenkins
+         UID: 20000
+         GID: 20000
+    stdin_open: true
+    tty: true
+    image: registry.amarulasolutions.com:443/kas-mend-builder
+    container_name: kas-mend-builder

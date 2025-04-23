@@ -23,3 +23,9 @@ If using kas-container, `docker load` the docker image container found at:
 https://drive.google.com/file/d/1gMtveXMFtlW_pdADBy5-ARqEu4dgyN7p
 then prepend the following to the command when using kas-container:
     KAS_CONTAINER_IMAGE=amarula/kas-java:latest kas-container [...]
+
+Alternative you can use docker-compose. Adjust your docker registry to
+your specific one and KAS_CONTAINER_IMAGE to the right one.
+
+    cd docker
+    docker compose build
