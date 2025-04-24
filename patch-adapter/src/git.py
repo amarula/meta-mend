@@ -2,83 +2,114 @@ import subprocess
 import os
 
 
-def execute_command(command: str) -> tuple[str, str]:
-    '''
-    Execute a command on the shell, retrieve stdout and stderr.
-    @param command: the command to be executed
-    @return: tuple with stdout, stderr
-    '''
-    out = subprocess.run(command.split(' '), stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    return out.stdout.decode(), out.stderr.decode()
+class Git(object):
 
+    def __init__(self, path: str):
+        self.path = path
 
-def execute_in_directory(cmd: str, target_dir: str) -> tuple[str, str]:
-    '''
-    Executes a command in a directory, then changing the workdir to the
-    original one.
-    @param cmd: the command
-    @param target_dir: the directory in which to execute the command
-    @return: tuple with stdout, stderr
-    '''
-    current_dir = os.getcwd()
-    os.chdir(target_dir)
-    out, err = execute_command(cmd)
-    os.chdir(current_dir)
-    return out, err
+    def execute_command(self, command: str) -> tuple[str, str]:
+        '''
+        Execute a command on the shell, retrieve stdout and stderr.
+        @param command: the command to be executed
+        @return: tuple with stdout, stderr
+        '''
+        current_dir = os.getcwd()
+        os.chdir(self.path)
+        out = subprocess.run(command.split(' '), stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        os.chdir(current_dir)
+        return out.stdout.decode(), out.stderr.decode()
 
+    def apply_check(self, patch_path: str) -> tuple[bool, str]:
+        '''
+        Perform a git apply --check. If it works, the function returns True. Else,
+        this function returns False and the error message.
+        '''
+        cmd = f"git apply --check {patch_path}"
+        out, err = self.execute_command(cmd)
+        if err is not None and len(err) > 0:
+            return False, err
+        return True, out
 
-def apply_check(patch_path: str, target_dir: str) -> tuple[bool, str]:
-    '''
-    Perform a git apply --check. If it works, the function returns True. Else,
-    this function returns False and the error message.
-    '''
-    cmd = f"git apply --check {patch_path}"
-    out, err = execute_in_directory(cmd, target_dir)
-    if err is not None and len(err) > 0:
-        return False, err
-    return True, out
+    def apply_R(self, patch_path: str) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = f"git apply -R {patch_path}"
+        out, err = self.execute_command(cmd)
+        if err is not None and len(err) > 0:
+            return False, err
+        return True, out
 
+    def apply(self, patch_path: str) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = f"git apply {patch_path}"
+        out, err = self.execute_command(cmd)
+        if err is not None and len(err) > 0:
+            return False, err
+        return True, out
 
-def full_apply(patch_path: str, target_dir: str) -> tuple[bool, str]:
-    '''
-    Apply the patch. This function returns true if the patch is applied
-    correctly, otherwise it returns False with the stderr output.
-    '''
-    cmd = f"git am < {patch_path}"
-    out, err = execute_in_directory(cmd, target_dir)
-    if err is not None and len(err) > 0:
-        return False, err
-    return True, out
+    def reset_hard(self, commit: str) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = f"git reset --hard {commit}"
+        out, err = self.execute_command(cmd)
+        if err is not None and len(err) > 0:
+            return False, err
+        return True, out
 
+    def init(self) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = "git init"
+        out, err = self.execute_command(cmd)
+        return True, out
 
-def reset_hard(commit: str, target_dir: str) -> tuple[bool, str]:
-    '''
-    Apply the patch. This function returns true if the patch is applied
-    correctly, otherwise it returns False with the stderr output.
-    '''
-    cmd = f"git reset --hard {commit}"
-    out, err = execute_in_directory(cmd, target_dir)
-    if err is not None and len(err) > 0:
-        return False, err
-    return True, out
+    def remove_repo(self) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = "rm -rf .git"
+        out, err = self.execute_command(cmd)
+        return True, out
 
+    def stash(self) -> tuple[bool, str]:
+        '''
+        Apply the patch. This function returns true if the patch is applied
+        correctly, otherwise it returns False with the stderr output.
+        '''
+        cmd = "git stash"
+        out, err = self.execute_command(cmd)
+        return True, out
 
-def init(target_dir: str) -> tuple[bool, str]:
-    '''
-    Apply the patch. This function returns true if the patch is applied
-    correctly, otherwise it returns False with the stderr output.
-    '''
-    cmd = "git init"
-    out, err = execute_in_directory(cmd, target_dir)
-    return True, out
+    def fast_commit(self, message: str) -> tuple[bool, str]:
+        cmd = f"git commit -m {message}"
+        out, err = self.execute_command(cmd)
+        if len(err) > 0:
+            return False, err
+        return True, out
 
+    def add(self, paths: list) -> tuple[bool, str]:
+        cmd = "git add "
+        for path in paths:
+            cmd += (path + " ")
+        out, err = self.execute_command(cmd)
+        if len(err) > 0:
+            return False, err
+        return True, out
 
-def remove_repo(target_dir: str) -> tuple[bool, str]:
-    '''
-    Apply the patch. This function returns true if the patch is applied
-    correctly, otherwise it returns False with the stderr output.
-    '''
-    cmd = "rm -rf .git"
-    out, err = execute_in_directory(cmd, target_dir)
-    return True, out
+    def restore_all(self) -> tuple[bool, str]:
+        cmd = "git restore ."
+        out, err = self.execute_command(cmd)
+        if len(err) > 0:
+            return False, err
+        return True, out
