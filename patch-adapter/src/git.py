@@ -46,7 +46,39 @@ def full_apply(patch_path: str, target_dir: str) -> tuple[bool, str]:
     correctly, otherwise it returns False with the stderr output.
     '''
     cmd = f"git am < {patch_path}"
-    out, err = execute_in_directory(cmd)
+    out, err = execute_in_directory(cmd, target_dir)
     if err is not None and len(err) > 0:
         return False, err
+    return True, out
+
+
+def reset_hard(commit: str, target_dir: str) -> tuple[bool, str]:
+    '''
+    Apply the patch. This function returns true if the patch is applied
+    correctly, otherwise it returns False with the stderr output.
+    '''
+    cmd = f"git reset --hard {commit}"
+    out, err = execute_in_directory(cmd, target_dir)
+    if err is not None and len(err) > 0:
+        return False, err
+    return True, out
+
+
+def init(target_dir: str) -> tuple[bool, str]:
+    '''
+    Apply the patch. This function returns true if the patch is applied
+    correctly, otherwise it returns False with the stderr output.
+    '''
+    cmd = "git init"
+    out, err = execute_in_directory(cmd, target_dir)
+    return True, out
+
+
+def remove_repo(target_dir: str) -> tuple[bool, str]:
+    '''
+    Apply the patch. This function returns true if the patch is applied
+    correctly, otherwise it returns False with the stderr output.
+    '''
+    cmd = "rm -rf .git"
+    out, err = execute_in_directory(cmd, target_dir)
     return True, out
