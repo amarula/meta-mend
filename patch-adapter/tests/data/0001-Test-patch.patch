@@ -1,0 +1,27 @@
+From 60f0dddd406ea8c26dca9208efa48bd58b819043 Mon Sep 17 00:00:00 2001
+From: Andrea Calabrese <andrea1995.c@live.com>
+Date: Tue, 15 Apr 2025 13:26:52 +0200
+Subject: [PATCH] Test patch
+
+This patch adds "hello world"
+
+Signed-off-by: Andrea Calabrese <andrea.calabrese@amarulasolutions.com>
+---
+ simple.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/simple.c b/simple.c
+index 4e43f4b..7791fbb 100644
+--- a/simple.c
++++ b/simple.c
+@@ -1,3 +1,6 @@
+ #include <stdio.h>
+ 
+-int main() { return 0; }
++int main() {
++  printf("Hello world!\n");
++  return 0;
++}
+-- 
+2.43.0
+

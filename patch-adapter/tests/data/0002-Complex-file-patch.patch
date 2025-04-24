@@ -1,0 +1,27 @@
+From cf65680b4b1a08b4bc65995b9808e9f3eca44a3e Mon Sep 17 00:00:00 2001
+From: Andrea Calabrese <andrea1995.c@live.com>
+Date: Tue, 15 Apr 2025 16:27:04 +0200
+Subject: [PATCH 2/2] Complex file patch
+
+This should be inapplicable without human intervention
+
+Signed-off-by: Andrea Calabrese <andrea1995.c@live.com>
+---
+ multiple_possibilities.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/multiple_possibilities.c b/multiple_possibilities.c
+index a9f785c..5c007b7 100644
+--- a/multiple_possibilities.c
++++ b/multiple_possibilities.c
+@@ -6,6 +6,6 @@ int print_stuff() {
+ }
+ 
+ int main() {
+-  printf("Hello world1!");
++  printf("Hello world!");
+   return 0;
+ }
+-- 
+2.43.0
+
