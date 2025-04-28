@@ -16,7 +16,6 @@ It requires the host's java runtime, for which a custom `kas-container` image is
     WS_APIKEY = "<apiKey>"
     WS_WSS_URL = "<wssUrl>"
     WS_PRODUCTNAME = "<productName>"
-    WS_PRODUCTTOKEN = "<productToken>"
 
 
 If using kas-container, `docker load` the docker image container found at:
