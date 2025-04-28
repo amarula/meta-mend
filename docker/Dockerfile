@@ -1,4 +1,4 @@
-FROM ghcr.io/siemens/kas/kas:latest
+FROM ghcr.io/siemens/kas/kas:4.7
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sudo apt-get update
