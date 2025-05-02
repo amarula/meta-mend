@@ -3,6 +3,10 @@ MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
 HOSTTOOLS += "java"
 
+MEND_LATEST_LOG_NAME = "latest.json"
+
+AUTO_PATCH = "true"
+
 def mend_request(encoded_data):
     import urllib.request
 
@@ -65,13 +69,15 @@ python mend_report_handler() {
         response_json = json.loads(res)
         timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.json" % (timestamp))
+        link_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), d.getVar('MEND_LATEST_LOG_NAME'))
 
         os.makedirs(d.getVar('MEND_CHECK_SUMMARY_DIR'), exist_ok=True)
 
         with open(out_path, "w") as f:
             json.dump(response_json, f, indent=2)
+        os.system(f"ln {out_path} {link_path}")
         bb.note(f"Mend report succesfully generated at {out_path}")
-
+        bb.note(f"Latest report can also be accessed at {link_path}")
     except Exception as err:
         bb.warn(f"Generating Mend report failed. Details: {err}")
 }
@@ -159,6 +165,23 @@ python do_mend_check() {
 
     bb.note("Mend Unified Agent scan completed.")
 }
+
+
+python download_patches() {
+    import sys
+    # bb.note(f"CWD = {sys.path}")
+    if not d.getVar("AUTO_PATCH") == "true":
+        return
+    from patch_download import get_patches
+    bb.note(f"Downloading patches...")
+    save_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), d.getVar('MEND_LATEST_LOG_NAME'))
+    get_patches(save_path, "temp")
+    bb.note(f"Patches downloaded and saved in 'temp' directory")
+}
+
+addhandler download_patches
+download_patches[eventmask] = "bb.event.BuildCompleted"
+download_patches[deptask] = "mend_report_handler"
 
 addtask mend_check after do_patch before do_build
 do_mend_check[nostamp] = "1"
