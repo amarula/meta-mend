@@ -2,6 +2,23 @@ MEND_LOG_LEVEL ?= "debug"
 
 HOSTTOOLS += "java"
 
+def mend_request(encoded_data):
+    import urllib.request
+
+    response = ""
+    httprequest = urllib.request.Request(
+        method="POST",
+        url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
+        data=encoded_data,
+        headers={"Content-Type": "application/json"},
+    )
+
+    with urllib.request.urlopen(httprequest) as httpresponse:
+        response = httpresponse.read().decode() if httpresponse.status == 200 else ""
+
+    return response
+
+
 python mend_check_warn_handler() {
     # Only warn once
     if getattr(bb.event, 'mend_warned', False):
@@ -28,9 +45,6 @@ mend_check_warn_handler[eventmask] = "bb.event.ParseStarted"
 python do_mend_check() {
     from oe.cve_check import get_patched_cves
     import json
-    import urllib.request
-    import urllib.parse
-    import urllib.error
 
     if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("WS_PRODUCTNAME"):
         return
@@ -50,17 +64,7 @@ python do_mend_check() {
                 }
             )
 
-            res = ""
-            httprequest = urllib.request.Request(
-                method="POST",
-                url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
-                data=data.encode(),
-                headers={"Content-Type": "application/json"},
-            )
-
-            with urllib.request.urlopen(httprequest) as httpresponse:
-                res = httpresponse.read().decode() if httpresponse.status == 200 else ""
-
+            res = mend_request(data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
@@ -81,17 +85,7 @@ python do_mend_check() {
                 }
             )
 
-            res = ""
-            httprequest = urllib.request.Request(
-                method="POST",
-                url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
-                data=data.encode(),
-                headers={"Content-Type": "application/json"},
-            )
-
-            with urllib.request.urlopen(httprequest) as httpresponse:
-                res = httpresponse.read().decode() if httpresponse.status == 200 else ""
-
+            res = mend_request(data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
@@ -112,17 +106,7 @@ python do_mend_check() {
                 }
             )
 
-            res = ""
-            httprequest = urllib.request.Request(
-                method="POST",
-                url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
-                data=data.encode(),
-                headers={"Content-Type": "application/json"},
-            )
-
-            with urllib.request.urlopen(httprequest) as httpresponse:
-                res = httpresponse.read().decode() if httpresponse.status == 200 else ""
-
+            res = mend_request(data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
