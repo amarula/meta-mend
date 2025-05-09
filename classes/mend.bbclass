@@ -1,4 +1,5 @@
 MEND_LOG_LEVEL ?= "debug"
+MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
 HOSTTOOLS += "java"
 
@@ -41,6 +42,43 @@ python mend_check_warn_handler() {
 
 addhandler mend_check_warn_handler
 mend_check_warn_handler[eventmask] = "bb.event.ParseStarted"
+
+
+python mend_report_handler() {
+    import json
+    import datetime
+
+    try:
+        data = json.dumps(
+            {
+                "requestType": "getProductAlerts",
+                "userKey": d.getVar('WS_USERKEY'),
+                "productToken": d.getVar('WS_PRODUCTTOKEN')
+            }
+        )
+
+        res = mend_request(data.encode())
+
+        if res == "":
+            raise Exception("HTTP Response error.")
+
+        response_json = json.loads(res)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.json" % (timestamp))
+
+        os.makedirs(d.getVar('MEND_CHECK_SUMMARY_DIR'), exist_ok=True)
+
+        with open(out_path, "w") as f:
+            json.dump(response_json, f, indent=2)
+        bb.note(f"Mend report succesfully generated at {out_path}")
+
+    except Exception as err:
+        bb.warn(f"Generating Mend report failed. Details: {err}")
+}
+
+addhandler mend_report_handler
+mend_report_handler[eventmask] = "bb.event.BuildCompleted"
+
 
 python do_mend_check() {
     from oe.cve_check import get_patched_cves
