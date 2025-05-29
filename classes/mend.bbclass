@@ -32,6 +32,8 @@ python mend_check_warn_handler() {
         missing_vars.append("WS_APIKEY")
     if not e.data.getVar("WS_PRODUCTNAME"):
         missing_vars.append("WS_PRODUCTNAME")
+    if not e.data.getVar("WS_PRODUCTTOKEN"):
+        missing_vars.append("WS_PRODUCTTOKEN")
 
     if missing_vars:
         bb.warn(f"The following variables must be set in local.conf or a recipe for mend checking to function: {', '.join(missing_vars)}")
@@ -47,6 +49,9 @@ mend_check_warn_handler[eventmask] = "bb.event.ParseStarted"
 python mend_report_handler() {
     import json
     import datetime
+
+    if not d.getVar("WS_USERKEY") or not d.getVar("WS_PRODUCTTOKEN"):
+        return
 
     try:
         data = json.dumps(
