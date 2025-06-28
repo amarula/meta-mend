@@ -92,6 +92,10 @@ python do_mend_check() {
     if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("WS_PRODUCTNAME"):
         return
 
+    # Don't run package scan on native package
+    if not d.getVar('CLASSOVERRIDE') == 'class-target':
+        return
+
     patched_cves = get_patched_cves(d)
 
     if patched_cves:
