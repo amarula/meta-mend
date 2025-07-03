@@ -8,5 +8,3 @@ RUN sudo apt-get install -y \
             sudo apt-get clean;
 
 RUN mkdir -p /builder && wget https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar -P /builder
-
-COPY amarula.wss.config /builder

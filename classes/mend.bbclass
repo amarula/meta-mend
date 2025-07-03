@@ -3,6 +3,8 @@ MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
 HOSTTOOLS += "java"
 
+WS_AGENT_CONFIG ??= "/repo/meta-mend/files/mend.wss.config"
+
 def mend_request(encoded_data):
     import urllib.request
 
@@ -160,7 +162,7 @@ python do_mend_check() {
         except Exception as err:
             bb.warn(f"Ignoring alerts process failed. Details: {err}")
 
-    unified_agent_cmd = f"java -jar /builder/wss-unified-agent.jar -logLevel \"{d.getVar('MEND_LOG_LEVEL')}\" -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"/builder/amarula.wss.config\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
+    unified_agent_cmd = f"java -jar /builder/wss-unified-agent.jar -logLevel \"{d.getVar('MEND_LOG_LEVEL')}\" -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
 
     bb.note(f"Executing Mend Unified Agent command: {unified_agent_cmd}")
 
