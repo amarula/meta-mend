@@ -28,13 +28,13 @@ python mend_check_warn_handler() {
         return
 
     missing_vars = []
-    if not e.data.getVar("WS_USERKEY"):
+    if not d.getVar("WS_USERKEY"):
         missing_vars.append("WS_USERKEY")
-    if not e.data.getVar("WS_APIKEY"):
+    if not d.getVar("WS_APIKEY"):
         missing_vars.append("WS_APIKEY")
-    if not e.data.getVar("WS_PRODUCTNAME"):
+    if not d.getVar("WS_PRODUCTNAME"):
         missing_vars.append("WS_PRODUCTNAME")
-    if not e.data.getVar("WS_PRODUCTTOKEN"):
+    if not d.getVar("WS_PRODUCTTOKEN"):
         missing_vars.append("WS_PRODUCTTOKEN")
 
     if missing_vars:
