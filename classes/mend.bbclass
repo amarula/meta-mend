@@ -1,9 +1,17 @@
+MEND_VERSION = "25.7.1"
 MEND_LOG_LEVEL ?= "debug"
 MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
-HOSTTOOLS += "java"
-
 WS_AGENT_CONFIG ??= "/work/meta-mend/files/mend.wss.config"
+
+MEND_CLI_PATH ?= "/work/meta-mend/files/mend_${MEND_VERSION}"
+
+MEND_USER_KEY = "${WS_USERKEY}"
+export MEND_USER_KEY
+export MEND_URL
+export MEND_EMAIL
+
+export BB_ENV_PASSTHOUGH_ADDITIONS = "$BB_ENV_PASSTHROUGH_ADDITIONS MEND_URL MEND_USER_KEY MEND_EMAIL"
 
 def mend_request(encoded_data):
     import urllib.request
@@ -36,6 +44,10 @@ python mend_check_warn_handler() {
         missing_vars.append("WS_PRODUCTNAME")
     if not d.getVar("WS_PRODUCTTOKEN"):
         missing_vars.append("WS_PRODUCTTOKEN")
+    if not d.getVar("MEND_URL"):
+        missing_vars.append("MEND_URL")
+    if not d.getVar("MEND_EMAIL"):
+        missing_vars.append("MEND_EMAIL")
 
     if missing_vars:
         bb.warn(f"The following variables must be set in local.conf or a recipe for mend checking to function: {', '.join(missing_vars)}")
@@ -162,7 +174,7 @@ python do_mend_check() {
         except Exception as err:
             bb.warn(f"Ignoring alerts process failed. Details: {err}")
 
-    unified_agent_cmd = f"java -jar /builder/wss-unified-agent.jar -logLevel \"{d.getVar('MEND_LOG_LEVEL')}\" -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
+    unified_agent_cmd = f"MEND_BASEDIR={d.getVar('WORKDIR')} {d.getVar('MEND_CLI_PATH')} ua -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
 
     bb.note(f"Executing Mend Unified Agent command: {unified_agent_cmd}")
 

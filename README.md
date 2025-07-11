@@ -7,25 +7,44 @@ A Layer to support Mend SCA (Software Composition Analysis) for open-source vuln
 ## usage
 
 This layer exposes a bbclass to apply mend checking.
-It requires the host's java runtime, for which a custom `kas-container` image is provided, which also includes Java.
+It uses the `mend-cli` standalone tool provided by Mend.
+To automatically authenticate the `mend-cli` tool and allow it to
+access your organisation, some environment variables must be
+exported:
+
+    MEND_URL
+    MEND_USER_KEY
+    MEND_EMAIL
+
+For this project, the variables are exported directly from the
+`.bbclass`, so it is sufficient to add them as follows:
 
  ### In conf/local.conf (or in the local_conf_header section of the kas configuration):
+
+```
     INHERIT += " mend"
     
     WS_USERKEY = "<userKey>"
     WS_APIKEY = "<apiKey>"
-    WS_WSS_URL = "<wssUrl>"
     WS_PRODUCTNAME = "<productName>"
     WS_PRODUCTTOKEN = "<productToken>"
+    MEND_URL = "<mendUrl>"
+    MEND_EMAIL = "<email>"
+```
 
-
-If using kas-container, `docker load` the docker image container found at:
-https://drive.google.com/file/d/1gMtveXMFtlW_pdADBy5-ARqEu4dgyN7p
-then prepend the following to the command when using kas-container:
-    KAS_CONTAINER_IMAGE=amarula/kas-java:latest kas-container [...]
-
-Alternative you can use docker-compose. Adjust your docker registry to
-your specific one and KAS_CONTAINER_IMAGE to the right one.
-
-    cd docker
-    docker compose build
+- `INHERIT += " mend"` is similar to what is done for _cve_ checking,
+  and makes it so that all recipes globally inherit the _.bbclass_ and
+  the entire Yocto project is checked.
+- `WS_USERKEY` and `WS_APIKEY` are personal and can be found from the
+  Mend web interface for your organization.
+- `WS_PRODUCTNAME` is your desired product name: if a product with that
+  name is already present, it will be updated; if it doesn't exist, its
+  creation will be automatically handled by _meta-mend_.
+- `MEND_URL` is the Mend environment URL of your shared instance.
+  More information about this and the list of supported values
+  can be found at this
+  [link](https://docs.mend.io/platform/latest/authenticate-your-login-for-the-mend-cli#AuthenticateyourloginfortheMendCLI-MendCLI-mendauthloginparameters).
+- `MEND_EMAIL` must be set to the email of the account
+  corresponding to the `WS_USERKEY`.
+- Note that `MEND_USER_KEY` is not required, as it is the same as
+  `WS_USERKEY` and this is handled internally.
