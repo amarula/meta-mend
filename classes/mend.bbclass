@@ -3,7 +3,7 @@ MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
 HOSTTOOLS += "java"
 
-WS_AGENT_CONFIG ??= "/repo/meta-mend/files/mend.wss.config"
+WS_AGENT_CONFIG ??= "/work/meta-mend/files/mend.wss.config"
 
 def mend_request(encoded_data):
     import urllib.request
