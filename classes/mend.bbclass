@@ -1,9 +1,13 @@
 MEND_LOG_LEVEL ?= "debug"
 MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
 
-HOSTTOOLS += "java"
+WS_AGENT_CONFIG ??= "/work/meta-mend/files/mend.wss.config"
 
-WS_AGENT_CONFIG ??= "/repo/meta-mend/files/mend.wss.config"
+export BB_ENV_PASSTHOUGH_ADDITIONS = "$BB_ENV_PASSTHROUGH_ADDITIONS MEND_URL MEND_USER_KEY MEND_EMAIL"
+
+export MEND_URL
+export MEND_USER_KEY
+export MEND_EMAIL
 
 def mend_request(encoded_data):
     import urllib.request
@@ -28,14 +32,20 @@ python mend_check_warn_handler() {
         return
 
     missing_vars = []
-    if not e.data.getVar("WS_USERKEY"):
+    if not d.getVar("WS_USERKEY"):
         missing_vars.append("WS_USERKEY")
-    if not e.data.getVar("WS_APIKEY"):
+    if not d.getVar("WS_APIKEY"):
         missing_vars.append("WS_APIKEY")
-    if not e.data.getVar("WS_PRODUCTNAME"):
+    if not d.getVar("WS_PRODUCTNAME"):
         missing_vars.append("WS_PRODUCTNAME")
-    if not e.data.getVar("WS_PRODUCTTOKEN"):
+    if not d.getVar("WS_PRODUCTTOKEN"):
         missing_vars.append("WS_PRODUCTTOKEN")
+    if not d.getVar("MEND_URL"):
+        missing_vars.append("MEND_URL")
+    if not d.getVar("MEND_USER_KEY"):
+        missing_vars.append("MEND_USER_KEY")
+    if not d.getVar("MEND_EMAIL"):
+        missing_vars.append("MEND_EMAIL")
 
     if missing_vars:
         bb.warn(f"The following variables must be set in local.conf or a recipe for mend checking to function: {', '.join(missing_vars)}")
@@ -162,7 +172,7 @@ python do_mend_check() {
         except Exception as err:
             bb.warn(f"Ignoring alerts process failed. Details: {err}")
 
-    unified_agent_cmd = f"java -jar /builder/wss-unified-agent.jar -logLevel \"{d.getVar('MEND_LOG_LEVEL')}\" -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
+    unified_agent_cmd = f"/work/meta-mend/files/mend ua -logLevel \"{d.getVar('MEND_LOG_LEVEL')}\" -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
 
     bb.note(f"Executing Mend Unified Agent command: {unified_agent_cmd}")
 
