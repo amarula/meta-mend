@@ -27,7 +27,6 @@ For this project, the variables are exported directly from the
     WS_USERKEY = "<userKey>"
     WS_APIKEY = "<apiKey>"
     WS_PRODUCTNAME = "<productName>"
-    WS_PRODUCTTOKEN = "<productToken>"
     MEND_URL = "<mendUrl>"
     MEND_EMAIL = "<email>"
 ```

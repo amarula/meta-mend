@@ -43,8 +43,6 @@ python mend_check_warn_handler() {
         missing_vars.append("WS_APIKEY")
     if not d.getVar("WS_PRODUCTNAME"):
         missing_vars.append("WS_PRODUCTNAME")
-    if not d.getVar("WS_PRODUCTTOKEN"):
-        missing_vars.append("WS_PRODUCTTOKEN")
     if not d.getVar("MEND_URL"):
         missing_vars.append("MEND_URL")
     if not d.getVar("MEND_EMAIL"):
@@ -65,15 +63,36 @@ python mend_report_handler() {
     import json
     import datetime
 
-    if not d.getVar("WS_USERKEY") or not d.getVar("WS_PRODUCTTOKEN"):
+    if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY"):
         return
 
     try:
+        # Get PRODUCT TOKEN from PRODUCT NAME:
+        data = json.dumps(
+            {
+                "requestType": "getOrganizationProductTags",
+                "userKey": d.getVar('WS_USERKEY'),
+                "orgToken": d.getVar('WS_APIKEY')
+            }
+        )
+
+        res = mend_request(data.encode())
+        if res == "":
+            raise Exception("HTTP Response error.")
+
+        response_json = json.loads(res)
+
+        product_token = ""
+        for product in response_json.get("productTags", []):
+            if product.get("name") == d.getVar("WS_PRODUCTNAME"):
+                product_token = product.get("token")
+                break
+
         data = json.dumps(
             {
                 "requestType": "getProductAlerts",
                 "userKey": d.getVar('WS_USERKEY'),
-                "productToken": d.getVar('WS_PRODUCTTOKEN')
+                "productToken": product_token
             }
         )
 
@@ -117,12 +136,51 @@ python do_mend_check() {
         bb.note(f"Found {d.getVar('BPN')} patched cves: {patched_cves}")
 
         try:
+            # GET PRODUCT TOKEN FROM PRODUCT NAME
+            data = json.dumps(
+                {
+                    "requestType": "getOrganizationProductTags",
+                    "userKey": d.getVar('WS_USERKEY'),
+                    "orgToken": d.getVar('WS_APIKEY')
+                }
+            )
+
+            res = mend_request(data.encode())
+            if res == "":
+                raise Exception("HTTP Response error.")
+
+            response_json = json.loads(res)
+
+            product_token = ""
+            for product in response_json.get("productTags", []):
+                if product.get("name") == d.getVar("WS_PRODUCTNAME"):
+                    product_token = product.get("token")
+                    break
+
+            if product_token == "":
+                # CREATE PRODUCT
+                data = json.dumps(
+                    {
+                        "requestType": "createProduct",
+                        "userKey": d.getVar('WS_USERKEY'),
+                        "productName": d.getVar('WS_PRODUCTNAME'),
+                        "orgToken": d.getVar('WS_APIKEY')
+                    }
+                )
+
+                res = mend_request(data.encode())
+                if res == "":
+                    raise Exception("HTTP Response error.")
+
+                response_json = json.loads(res)
+                product_token = response_json['productToken']
+
             # GET PROJECT TOKEN FROM PACKAGE NAME
             data = json.dumps(
                 {
                     "requestType": "getAllProjects",
                     "userKey": d.getVar('WS_USERKEY'),
-                    "productToken": d.getVar('WS_PRODUCTTOKEN')
+                    "productToken": product_token
                 }
             )
 
