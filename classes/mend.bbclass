@@ -179,7 +179,7 @@ python do_mend_check() {
 
     bb.note(f"Executing Mend Unified Agent command: {unified_agent_cmd}")
 
-    bb.process.run(unified_agent_cmd, shell=True)
+    bb.process.run(unified_agent_cmd)
 
     bb.note("Mend Unified Agent scan completed.")
 }
