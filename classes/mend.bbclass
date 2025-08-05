@@ -1,6 +1,7 @@
 MEND_VERSION = "25.7.1"
-MEND_LOG_LEVEL ?= "debug"
 MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
+MEND_LOG_LEVEL ?= "DEBUG"
+export MEND_LOG_LEVEL
 
 WS_AGENT_CONFIG ??= "/work/meta-mend/files/mend.wss.config"
 
