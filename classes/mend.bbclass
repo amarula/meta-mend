@@ -31,6 +31,22 @@ def mend_request(encoded_data):
     return response
 
 
+def mend_request_raw(encoded_data):
+    import urllib.request
+
+    httprequest = urllib.request.Request(
+        method="POST",
+        url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
+        data=encoded_data,
+        headers={"Content-Type": "application/json"},
+    )
+
+    with urllib.request.urlopen(httprequest) as httpresponse:
+        if httpresponse.status == 200:
+            return httpresponse.read()
+        return
+
+
 python mend_check_warn_handler() {
     # Only warn once
     if getattr(bb.event, 'mend_warned', False):
@@ -110,6 +126,25 @@ python mend_report_handler() {
         with open(out_path, "w") as f:
             json.dump(response_json, f, indent=2)
         bb.note(f"Mend report succesfully generated at {out_path}")
+
+        if d.getVar("WS_ENABLE_PDF_REPORT") == "1":
+            data = json.dumps(
+                    {
+                    "requestType": "getProductRiskReport",
+                    "productToken": product_token,
+                    "userKey": d.getVar("WS_USERKEY")
+                }
+            )
+
+            pdf_content = mend_request_raw(data.encode())
+
+            if pdf_content:
+                pdf_out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.pdf" % (timestamp))
+                with open(pdf_out_path, "wb") as f:
+                    f.write(pdf_content)
+                bb.note(f"Mend PDF report successfully generated at {pdf_out_path}")
+            else:
+                raise Exception("HTTP Response error when requesting PDF report.")
 
     except Exception as err:
         bb.warn(f"Generating Mend report failed. Details: {err}")
