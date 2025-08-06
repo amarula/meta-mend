@@ -47,3 +47,21 @@ For this project, the variables are exported directly from the
   corresponding to the `WS_USERKEY`.
 - Note that `MEND_USER_KEY` is not required, as it is the same as
   `WS_USERKEY` and this is handled internally.
+
+
+## PDF report generation
+
+This meta-layer supports the generation of the report in PDF format
+in addition to the json one.
+To generate the PDF as well, add the following line to the
+configuration:
+
+```
+    WS_ENABLE_PDF_REPORT = "1"
+```
+
+The report can then be found at:
+
+```
+build/tmp-glibc/log/mend/mend-report-YYYYMMDDhhmmss.pdf
+```
