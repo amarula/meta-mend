@@ -165,6 +165,9 @@ python do_mend_check() {
     if not d.getVar('CLASSOVERRIDE') == 'class-target':
         return
 
+    if bb.data.inherits_class("nopackages", d):
+        return
+
     patched_cves = get_patched_cves(d)
 
     if patched_cves:
