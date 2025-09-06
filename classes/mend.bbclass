@@ -47,6 +47,66 @@ def mend_request_raw(encoded_data):
         return
 
 
+def mend_get_async_report(user_key, product_token, org_token):
+    import json
+    import time
+
+    data = json.dumps(
+        {
+            "requestType": "generateProductReportAsync",
+            "reportType": "RiskReport",
+            "format": "pdf",
+            "productToken": product_token,
+            "userKey": user_key
+        }
+    )
+
+    res = mend_request(data.encode())
+
+    if res == "":
+        raise Exception("HTTP Response error.")
+
+    response_json = json.loads(res)
+    status_data = response_json.get("asyncProcessStatus")
+
+    if status_data:
+        product_uuid = status_data.get('uuid')
+    else:
+        return "";
+
+    start_time = time.time()
+
+    while True:
+        if time.time() - start_time > 1200:
+            raise Exception("Timeout waiting server response.")
+
+        data = json.dumps(
+            {
+                 "requestType": "getAsyncProcessStatus",
+                 "orgToken": org_token,
+                 "userKey": user_key,
+                 "uuid": product_uuid
+            }
+        )
+        res = mend_request(data.encode())
+
+        if res == "":
+            raise Exception("HTTP Response error.")
+
+        response_json = json.loads(res)
+        status_data =  response_json.get("asyncProcessStatus")
+
+        if status_data:
+            status = status_data.get("status")
+
+        if status == "SUCCESS":
+            return product_uuid
+        if status == "FAILED":
+            return ""
+        if status == "IN_PROGRESS" or status == "PENDING":
+            time.sleep(5)
+
+
 python mend_check_warn_handler() {
     # Only warn once
     if getattr(bb.event, 'mend_warned', False):
@@ -128,23 +188,29 @@ python mend_report_handler() {
         bb.note(f"Mend report succesfully generated at {out_path}")
 
         if d.getVar("WS_ENABLE_PDF_REPORT") == "1":
+
+            res = mend_get_async_report(d.getVar('WS_USERKEY'), product_token, d.getVar('WS_APIKEY'))
+            if res == "":
+                raise Exception("Unable to download the report.")
+
             data = json.dumps(
                     {
-                    "requestType": "getProductRiskReport",
-                    "productToken": product_token,
-                    "userKey": d.getVar("WS_USERKEY")
-                }
+                    "requestType": "downloadAsyncReport",
+                    "orgToken": d.getVar('WS_APIKEY'),
+                    "userKey": d.getVar('WS_USERKEY'),
+                    "reportStatusUUID": res
+                    }
             )
 
-            pdf_content = mend_request_raw(data.encode())
+            zip_content = mend_request_raw(data.encode())
 
-            if pdf_content:
-                pdf_out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.pdf" % (timestamp))
-                with open(pdf_out_path, "wb") as f:
-                    f.write(pdf_content)
-                bb.note(f"Mend PDF report successfully generated at {pdf_out_path}")
+            if zip_content:
+                zip_out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.zip" % (timestamp))
+                with open(zip_out_path, "wb") as f:
+                    f.write(zip_content)
+                bb.note(f"Mend PDF report successfully generated at {zip_out_path}")
             else:
-                raise Exception("HTTP Response error when requesting PDF report.")
+                raise Exception("HTTP Response error when requesting report.")
 
     except Exception as err:
         bb.warn(f"Generating Mend report failed. Details: {err}")
