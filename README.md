@@ -63,5 +63,7 @@ configuration:
 The report can then be found at:
 
 ```
-build/tmp-glibc/log/mend/mend-report-YYYYMMDDhhmmss.pdf
+build/tmp-glibc/log/mend/mend-report-YYYYMMDDhhmmss.zip
 ```
+
+The file is a zipped version that contains the pdf reporting
