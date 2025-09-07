@@ -100,10 +100,13 @@ def mend_get_async_report(request_type, out_format, credentials, product_token):
             status = status_data.get("status")
 
         if status == "SUCCESS":
+            bb.debug(1, "Mend json SUCCESS")
             return product_uuid
         if status == "FAILED":
+            bb.debug(1, "Mend json FAILED")
             return ""
         if status == "IN_PROGRESS" or status == "PENDING":
+            bb.debug(1, f"Mend json {status}")
             time.sleep(5)
 
 
