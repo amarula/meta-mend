@@ -47,17 +47,17 @@ def mend_request_raw(encoded_data):
         return
 
 
-def mend_get_async_report(user_key, product_token, org_token):
+def mend_get_async_report(request_type, out_format, credentials, product_token):
     import json
     import time
 
     data = json.dumps(
         {
             "requestType": "generateProductReportAsync",
-            "reportType": "RiskReport",
-            "format": "pdf",
+            "reportType": request_type,
+            "format": out_format,
             "productToken": product_token,
-            "userKey": user_key
+            "userKey": credentials['user_key']
         }
     )
 
@@ -83,8 +83,8 @@ def mend_get_async_report(user_key, product_token, org_token):
         data = json.dumps(
             {
                  "requestType": "getAsyncProcessStatus",
-                 "orgToken": org_token,
-                 "userKey": user_key,
+                 "orgToken": credentials['org_token'],
+                 "userKey": credentials['user_key'],
                  "uuid": product_uuid
             }
         )
@@ -142,6 +142,11 @@ python mend_report_handler() {
     if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY"):
         return
 
+    credentials = {
+        'user_key': d.getVar("WS_USERKEY"),
+        'org_token': d.getVar("WS_APIKEY")
+    }
+
     try:
         # Get PRODUCT TOKEN from PRODUCT NAME:
         data = json.dumps(
@@ -167,7 +172,7 @@ python mend_report_handler() {
         data = json.dumps(
             {
                 "requestType": "getProductAlerts",
-                "userKey": d.getVar('WS_USERKEY'),
+                "userKey": credentials['user_key'],
                 "productToken": product_token
             }
         )
@@ -189,7 +194,7 @@ python mend_report_handler() {
 
         if d.getVar("WS_ENABLE_PDF_REPORT") == "1":
 
-            res = mend_get_async_report(d.getVar('WS_USERKEY'), product_token, d.getVar('WS_APIKEY'))
+            res = mend_get_async_report("RiskReport", "pdf", credentials, product_token)
             if res == "":
                 raise Exception("Unable to download the report.")
 
