@@ -14,13 +14,13 @@ export MEND_EMAIL
 
 export BB_ENV_PASSTHOUGH_ADDITIONS = "$BB_ENV_PASSTHROUGH_ADDITIONS MEND_URL MEND_USER_KEY MEND_EMAIL"
 
-def mend_request(encoded_data):
+def mend_request(url, encoded_data):
     import urllib.request
 
     response = ""
     httprequest = urllib.request.Request(
         method="POST",
-        url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
+        url=f"{url}/api/v1.4",
         data=encoded_data,
         headers={"Content-Type": "application/json"},
     )
@@ -31,12 +31,12 @@ def mend_request(encoded_data):
     return response
 
 
-def mend_request_raw(encoded_data):
+def mend_request_raw(url, encoded_data):
     import urllib.request
 
     httprequest = urllib.request.Request(
         method="POST",
-        url="https://saas-eu.whitesourcesoftware.com/api/v1.4",
+        url=f"{url}/api/v1.4",
         data=encoded_data,
         headers={"Content-Type": "application/json"},
     )
@@ -47,7 +47,7 @@ def mend_request_raw(encoded_data):
         return
 
 
-def mend_get_async_report(request_type, out_format, credentials, product_token):
+def mend_get_async_report(url, request_type, out_format, credentials, product_token):
     import json
     import time
 
@@ -61,7 +61,7 @@ def mend_get_async_report(request_type, out_format, credentials, product_token):
         }
     )
 
-    res = mend_request(data.encode())
+    res = mend_request(url, data.encode())
 
     if res == "":
         raise Exception("HTTP Response error.")
@@ -88,7 +88,7 @@ def mend_get_async_report(request_type, out_format, credentials, product_token):
                  "uuid": product_uuid
             }
         )
-        res = mend_request(data.encode())
+        res = mend_request(url, data.encode())
 
         if res == "":
             raise Exception("HTTP Response error.")
@@ -142,13 +142,15 @@ python mend_report_handler() {
     import json
     import datetime
 
-    if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY"):
+    if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("MEND_URL"):
         return
 
     credentials = {
         'user_key': d.getVar("WS_USERKEY"),
         'org_token': d.getVar("WS_APIKEY")
     }
+
+    mend_url = d.getVar("MEND_URL")
 
     try:
         # Get PRODUCT TOKEN from PRODUCT NAME:
@@ -160,7 +162,7 @@ python mend_report_handler() {
             }
         )
 
-        res = mend_request(data.encode())
+        res = mend_request(mend_url, data.encode())
         if res == "":
             raise Exception("HTTP Response error.")
 
@@ -180,7 +182,7 @@ python mend_report_handler() {
             }
         )
 
-        res = mend_request(data.encode())
+        res = mend_request(mend_url, data.encode())
 
         if res == "":
             raise Exception("HTTP Response error.")
@@ -197,7 +199,7 @@ python mend_report_handler() {
 
         if d.getVar("WS_ENABLE_PDF_REPORT") == "1":
 
-            res = mend_get_async_report("RiskReport", "pdf", credentials, product_token)
+            res = mend_get_async_report(mend_url, "RiskReport", "pdf", credentials, product_token)
             if res == "":
                 raise Exception("Unable to download the report.")
 
@@ -210,7 +212,7 @@ python mend_report_handler() {
                     }
             )
 
-            zip_content = mend_request_raw(data.encode())
+            zip_content = mend_request_raw(mend_url, data.encode())
 
             if zip_content:
                 zip_out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.zip" % (timestamp))
@@ -232,12 +234,14 @@ python do_mend_check() {
     from oe.cve_check import get_patched_cves
     import json
 
-    if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("WS_PRODUCTNAME"):
+    if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("WS_PRODUCTNAME") or not d.getVar("MEND_URL"):
         return
 
     # Don't run package scan on native package
     if not d.getVar('CLASSOVERRIDE') == 'class-target':
         return
+
+    mend_url = d.getVar("MEND_URL")
 
     patched_cves = get_patched_cves(d)
 
@@ -254,7 +258,7 @@ python do_mend_check() {
                 }
             )
 
-            res = mend_request(data.encode())
+            res = mend_request(mend_url, data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
@@ -277,7 +281,7 @@ python do_mend_check() {
                     }
                 )
 
-                res = mend_request(data.encode())
+                res = mend_request(mend_url, data.encode())
                 if res == "":
                     raise Exception("HTTP Response error.")
 
@@ -293,7 +297,7 @@ python do_mend_check() {
                 }
             )
 
-            res = mend_request(data.encode())
+            res = mend_request(mend_url, data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
@@ -314,7 +318,7 @@ python do_mend_check() {
                 }
             )
 
-            res = mend_request(data.encode())
+            res = mend_request(mend_url. data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
@@ -335,7 +339,7 @@ python do_mend_check() {
                 }
             )
 
-            res = mend_request(data.encode())
+            res = mend_request(mend_url, data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
