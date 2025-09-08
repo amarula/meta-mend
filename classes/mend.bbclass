@@ -346,7 +346,7 @@ python do_mend_check() {
         except Exception as err:
             bb.warn(f"Ignoring alerts process failed. Details: {err}")
 
-    unified_agent_cmd = f"MEND_BASEDIR={d.getVar('WORKDIR')} {d.getVar('MEND_CLI_PATH')} ua -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
+    unified_agent_cmd = f"MEND_BASEDIR={d.getVar('WORKDIR')} {d.getVar('MEND_CLI_PATH')} ua -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -wss.url \"{mend_url}\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
 
     bb.note(f"Executing Mend Unified Agent command: {unified_agent_cmd}")
 
