@@ -241,6 +241,10 @@ python do_mend_check() {
     if not d.getVar('CLASSOVERRIDE') == 'class-target':
         return
 
+    # Don't run scan on packages with closed license
+    if d.getVar('LICENSE') == 'CLOSED':
+        return
+
     mend_url = d.getVar("MEND_URL")
 
     patched_cves = get_patched_cves(d)
