@@ -241,6 +241,9 @@ python do_mend_check() {
     if not d.getVar('CLASSOVERRIDE') == 'class-target':
         return
 
+    if bb.data.inherits_class("nopackages", d):
+        return
+
     # Don't run scan on packages with closed license
     if d.getVar('LICENSE') == 'CLOSED':
         return
