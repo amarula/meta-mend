@@ -230,6 +230,7 @@ addhandler mend_report_handler
 mend_report_handler[eventmask] = "bb.event.BuildCompleted"
 
 
+do_mend_check[network] = "1"
 python do_mend_check() {
     from oe.cve_check import get_patched_cves
     import json
