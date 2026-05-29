@@ -238,11 +238,11 @@ python do_mend_check() {
     if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("WS_PRODUCTNAME") or not d.getVar("MEND_URL"):
         return
 
-    blacklist_str = d.getVar("MEND_BLACKLIST_PACKAGE") or ""
+    blacklist_str = d.getVar("MEND_BLACKLIST_PACKAGES") or ""
     blacklist = blacklist_str.split()
     pn = d.getVar("PN")
     if pn in blacklist:
-        bb.note("Mend scan skipped: '%s' is in MEND_BLACKLIST_PACKAGE" % pn)
+        bb.note("Mend scan skipped: '%s' is in MEND_BLACKLIST_PACKAGES" % pn)
         return
 
     # Don't run package scan on native package
