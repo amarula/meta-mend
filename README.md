@@ -4,7 +4,7 @@
 A Layer to support Mend SCA (Software Composition Analysis) for open-source vulnerabilities in Yocto.
 
 
-## usage
+## Usage
 
 This layer exposes a bbclass to apply mend checking.
 It uses the `mend-cli` standalone tool provided by Mend.
@@ -12,23 +12,25 @@ To automatically authenticate the `mend-cli` tool and allow it to
 access your organisation, some environment variables must be
 exported:
 
-    MEND_URL
-    MEND_USER_KEY
-    MEND_EMAIL
+```
+MEND_URL
+MEND_USER_KEY
+MEND_EMAIL
+```
 
 For this project, the variables are exported directly from the
 `.bbclass`, so it is sufficient to add them as follows:
 
- ### In conf/local.conf (or in the local_conf_header section of the kas configuration):
+### In conf/local.conf (or in the local_conf_header section of the kas configuration)
 
 ```
-    INHERIT += " mend cve-exclusion"
+INHERIT += " mend cve-exclusion"
     
-    WS_USERKEY = "<userKey>"
-    WS_APIKEY = "<apiKey>"
-    WS_PRODUCTNAME = "<productName>"
-    MEND_URL = "<mendUrl>"
-    MEND_EMAIL = "<email>"
+WS_USERKEY = "<userKey>"
+WS_APIKEY = "<apiKey>"
+WS_PRODUCTNAME = "<productName>"
+MEND_URL = "<mendUrl>"
+MEND_EMAIL = "<email>"
 ```
 
 - `INHERIT += " mend"` is similar to what is done for _cve_ checking,
@@ -65,7 +67,7 @@ To generate the PDF as well, add the following line to the
 configuration:
 
 ```
-    WS_ENABLE_PDF_REPORT = "1"
+WS_ENABLE_PDF_REPORT = "1"
 ```
 
 The report can then be found at:
