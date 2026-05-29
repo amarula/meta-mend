@@ -22,7 +22,7 @@ For this project, the variables are exported directly from the
  ### In conf/local.conf (or in the local_conf_header section of the kas configuration):
 
 ```
-    INHERIT += " mend"
+    INHERIT += " mend cve-exclusion"
     
     WS_USERKEY = "<userKey>"
     WS_APIKEY = "<apiKey>"
