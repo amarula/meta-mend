@@ -48,6 +48,14 @@ For this project, the variables are exported directly from the
 - Note that `MEND_USER_KEY` is not required, as it is the same as
   `WS_USERKEY` and this is handled internally.
 
+### Blacklist packages
+
+To blacklist packages and exclude them from the Mend scan, add them to
+`MEND_BLACKLIST_PACKAGES`, like this
+
+```
+MEND_BLACKLIST_PACKAGES = "linux"
+```
 
 ## PDF report generation
 
