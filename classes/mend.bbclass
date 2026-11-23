@@ -333,7 +333,7 @@ python do_mend_check() {
                 }
             )
 
-            res = mend_request(mend_url. data.encode())
+            res = mend_request(mend_url, data.encode())
             if res == "":
                 raise Exception("HTTP Response error.")
 
