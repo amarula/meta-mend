@@ -224,6 +224,7 @@ python mend_report_handler() {
 
     except Exception as err:
         bb.warn(f"Generating Mend report failed. Details: {err}")
+        raise
 }
 
 addhandler mend_report_handler
@@ -360,6 +361,7 @@ python do_mend_check() {
 
         except Exception as err:
             bb.warn(f"Ignoring alerts process failed. Details: {err}")
+            raise
 
     unified_agent_cmd = f"MEND_BASEDIR={d.getVar('WORKDIR')} {d.getVar('MEND_CLI_PATH')} ua -userKey \"{d.getVar('WS_USERKEY')}\" -apiKey \"{d.getVar('WS_APIKEY')}\" -c \"{d.getVar('WS_AGENT_CONFIG')}\" -d \"{d.getVar('S')}\" -wss.url \"{mend_url}/agent\" -product \"{d.getVar('WS_PRODUCTNAME')}\" -project \"{d.getVar('BPN')}\""
 
