@@ -25,7 +25,7 @@ def mend_request(url, encoded_data):
         headers={"Content-Type": "application/json"},
     )
 
-    with urllib.request.urlopen(httprequest) as httpresponse:
+    with urllib.request.urlopen(httprequest, timeout=1200) as httpresponse:
         response = httpresponse.read().decode() if httpresponse.status == 200 else ""
 
     return response
