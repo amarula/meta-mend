@@ -1,5 +1,7 @@
 MEND_VERSION = "25.7.1"
 MEND_CHECK_SUMMARY_DIR ?= "${LOG_DIR}/mend/"
+WS_ENABLE_PDF_REPORT ?= "0"
+WS_ENABLE_JSON_REPORT ?= "1"
 MEND_LOG_LEVEL ?= "DEBUG"
 export MEND_LOG_LEVEL
 
@@ -145,6 +147,9 @@ python mend_report_handler() {
     if not d.getVar("WS_USERKEY") or not d.getVar("WS_APIKEY") or not d.getVar("MEND_URL"):
         return
 
+    if d.getVar("WS_ENABLE_PDF_REPORT") == "0" and d.getVar("WS_ENABLE_JSON_REPORT") == "0":
+        return
+
     credentials = {
         'user_key': d.getVar("WS_USERKEY"),
         'org_token': d.getVar("WS_APIKEY")
@@ -153,6 +158,9 @@ python mend_report_handler() {
     mend_url = d.getVar("MEND_URL")
 
     try:
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        os.makedirs(d.getVar('MEND_CHECK_SUMMARY_DIR'), exist_ok=True)
+
         # Get PRODUCT TOKEN from PRODUCT NAME:
         data = json.dumps(
             {
@@ -174,28 +182,26 @@ python mend_report_handler() {
                 product_token = product.get("token")
                 break
 
-        data = json.dumps(
-            {
-                "requestType": "getProductAlerts",
-                "userKey": credentials['user_key'],
-                "productToken": product_token
-            }
-        )
+        if d.getVar("WS_ENABLE_JSON_REPORT") == "1":
+            data = json.dumps(
+                {
+                    "requestType": "getProductAlerts",
+                    "userKey": credentials['user_key'],
+                    "productToken": product_token
+                }
+            )
 
-        res = mend_request(mend_url, data.encode())
+            res = mend_request(mend_url, data.encode())
 
-        if res == "":
-            raise Exception("HTTP Response error.")
+            if res == "":
+                raise Exception("HTTP Response error.")
 
-        response_json = json.loads(res)
-        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-        out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.json" % (timestamp))
+            response_json = json.loads(res)
+            out_path = os.path.join(d.getVar('MEND_CHECK_SUMMARY_DIR'), "mend-report-%s.json" % (timestamp))
 
-        os.makedirs(d.getVar('MEND_CHECK_SUMMARY_DIR'), exist_ok=True)
-
-        with open(out_path, "w") as f:
-            json.dump(response_json, f, indent=2)
-        bb.note(f"Mend report succesfully generated at {out_path}")
+            with open(out_path, "w") as f:
+                json.dump(response_json, f, indent=2)
+            bb.note(f"Mend report succesfully generated at {out_path}")
 
         if d.getVar("WS_ENABLE_PDF_REPORT") == "1":
 
